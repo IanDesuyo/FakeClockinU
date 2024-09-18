@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <script src="Scripts/ccu.js"></script>
+    <title>請重新登入</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="Content/bootstrap.min.css" rel="stylesheet" />
+    <link href="Content/bootstrap-theme.css" rel="stylesheet" />
+    <script src="Scripts/jquery-3.3.1.min.js"></script>
+    <script src="Scripts/bootstrap.min.js"></script>
+  </head>
+  <body style="background-color: #f9eeee">
+    <form method="post" action="./Error.aspx" id="form1">
+      <div class="aspNetHidden">
+        <input type="hidden" name="__VIEWSTATE" id="__VIEWSTATE" value="" />
+      </div>
+
+      <div class="aspNetHidden">
+        <input type="hidden" name="__VIEWSTATEGENERATOR" id="__VIEWSTATEGENERATOR" value="" />
+      </div>
+      <div style="text-align: center">
+        <img src="img/title_img.png" style="width: 263px; height: 72px" /><br />
+        <br />
+        <h4 style="color: red">發生錯誤，請重新進入本功能。</h4>
+        <br />
+        {% if msg %}
+        <h4 style="color: red">{{ msg }}</h4>
+        {% endif %}
+      </div>
+    </form>
+  </body>
+</html>

@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <script src="Scripts/ccu.js"></script>
+    <title>學生課堂打卡</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="Content/bootstrap.min.css" rel="stylesheet" />
+    <link href="Content/bootstrap-theme.css" rel="stylesheet" />
+    <script src="Scripts/jquery-3.3.1.min.js"></script>
+    <script src="Scripts/bootstrap.min.js"></script>
+    <style type="text/css">
+      .btn-margin {
+        margin: 4px;
+        width: 250px;
+      }
+
+      th {
+        padding: 2px;
+        text-align: center;
+      }
+
+      td {
+        padding: 2px;
+      }
+
+      .GridView {
+        max-width: 400px;
+      }
+
+      .hidden-link {
+        display: none;
+      }
+
+      .buttonClass {
+        display: inline-block;
+        margin-bottom: 20px;
+        font-weight: 400;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: middle;
+        -ms-touch-action: manipulation;
+        touch-action: manipulation;
+        cursor: pointer;
+        background-image: none;
+        border: 1px solid transparent;
+        padding: 6px 12px;
+        font-size: 14px;
+        line-height: 1.42857143;
+        border-radius: 4px;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        color: #333;
+        background-color: #fff;
+        border-color: #ccc;
+      }
+      .buttonClass:hover {
+        border: solid 1px Black;
+        background-color: #f5f5f5;
+        text-decoration: none;
+      }
+
+      .disabledBtn,
+      .disabledBtn:hover {
+        border: 1px solid #999999;
+        background-color: #cccccc;
+        color: #666666;
+        display: inline-block;
+        margin-bottom: 20px;
+        font-weight: 400;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: middle;
+        cursor: not-allowed;
+        border: 1px solid transparent;
+        padding: 6px 12px;
+        font-size: 14px;
+        line-height: 1.42857143;
+        border-radius: 4px;
+        text-decoration: none;
+      }
+    </style>
+  </head>
+  <body style="background-color: #f9eeee">
+    <form method="post" action="./ClassClockin.aspx" id="form1">
+      <div class="aspNetHidden">
+        <input type="hidden" name="__VIEWSTATE" id="__VIEWSTATE" value="{{ view_state.view_state }}" />
+      </div>
+
+      <div class="aspNetHidden">
+        <input
+          type="hidden"
+          name="__VIEWSTATEGENERATOR"
+          id="__VIEWSTATEGENERATOR"
+          value="{{ view_state.view_state_generator }}"
+        />
+      </div>
+      <div style="text-align: center">
+        <img src="img/title_img.png" style="width: 263px; height: 72px" /><br />
+        <span id="timewrapper" style="visibility: hidden">time</span><br />
+        <span id="LabelId">{{ student }}同學您好</span><br />
+
+        <span id="LabelDoc" style="color: Blue">請掃描QRcode讓老師知道您在教室</span><br />
+        <span id="LabelNote" style="color: Red; font-size: Medium; font-weight: bold">{{ error or "" }}</span><br />
+
+        <a id="QRcodeBtn" class="buttonClass" href="QRcodeScanner.aspx" target="_blank">掃描QRcode</a><br />
+
+        <h5 style="color: red">學生經由本系統打卡的紀錄用於輔助老師點名之用</h5>
+
+        <div>
+          <table
+            class="GridView"
+            cellspacing="0"
+            align="Center"
+            rules="all"
+            border="1"
+            id="GridViewRec"
+            style="border-collapse: collapse"
+          >
+            <tr>
+              <th scope="col">課程名稱</th>
+              <th scope="col">節次</th>
+              <th scope="col">登錄時間</th>
+            </tr>
+            <tr>
+              {% for record in clockins %}
+              <tr>
+                <td align="left">{{ record.course }}</td>
+                <td>{{ record.period }}</td>
+                <td>{{ record.time }}</td>
+              </tr>
+              {% endfor %}
+              {% if clockins|length == 0 %}
+              <td colspan="3">今日查無記錄</td>
+              {% endif %}
+            </tr>
+          </table>
+        </div>
+        <br />
+        <span id="LabelMonthlyRecord" style="font-size: Large; font-weight: bold">歷史打卡紀錄</span>
+        <div>
+          <table
+            class="GridView"
+            cellspacing="0"
+            align="Center"
+            rules="all"
+            border="1"
+            id="MonthlyRecordRec"
+            style="border-collapse: collapse"
+          >
+            <tr>
+              <th scope="col">課程名稱</th>
+              <th scope="col">節次</th>
+              <th scope="col">登錄時間</th>
+            </tr>
+            {% for record in clockins %}
+            <tr>
+              <td align="left">{{ record.course }}</td>
+              <td>{{ record.period }}</td>
+              <td>{{ record.time }}</td>
+            </tr>
+            {% endfor %}
+            {% if clockins|length == 0 %}
+            <td colspan="3">今日查無記錄</td>
+            {% endif %}
+          </table>
+        </div>
+      </div>
+    </form>
+    <script type="text/javascript">
+      var inittime;
+      var visible = 0;
+      var lastCheck = 0;
+      $.getJSON("TimeService.svc/servertime", function (data) {
+        inittime = Date.parse(data.Data);
+        if (inittime) {
+          visible = 1;
+          currentTime();
+          setInterval(currentTime, 1000);
+        }
+      });
+      function currentTime() {
+        var myDate = new Date(inittime);
+        var nowDateYear = myDate.getFullYear() - 1911;
+        var nowMonth = myDate.getMonth() + 1;
+        var nowDate = myDate.getDate();
+        var nowDay = myDate.getDay();
+        var nowHour = myDate.getHours();
+        var nowMinute = myDate.getMinutes();
+        var nowSecond = myDate.getSeconds();
+        if (nowHour <= 9) {
+          nowHour = "0" + nowHour;
+        }
+        if (nowMinute <= 9) {
+          nowMinute = "0" + nowMinute;
+        }
+        if (nowSecond <= 9) {
+          nowSecond = "0" + nowSecond;
+        }
+        switch (nowDay) {
+          case 0:
+            nowDay = "星期日";
+            break;
+          case 1:
+            nowDay = "星期一";
+            break;
+          case 2:
+            nowDay = "星期二";
+            break;
+          case 3:
+            nowDay = "星期三";
+            break;
+          case 4:
+            nowDay = "星期四";
+            break;
+          case 5:
+            nowDay = "星期五";
+            break;
+          case 6:
+            nowDay = "星期六";
+            break;
+        }
+        var timeString =
+          "民國" +
+          nowDateYear.toString() +
+          "年" +
+          nowMonth.toString() +
+          "月" +
+          nowDate.toString() +
+          "日 " +
+          nowDay +
+          " " +
+          nowHour +
+          ":" +
+          nowMinute +
+          ":" +
+          nowSecond;
+        var timewrapper = document.getElementById("timewrapper");
+        timewrapper.firstChild.nodeValue = timeString;
+        if (visible == 1) document.getElementById("timewrapper").style.visibility = "visible";
+        inittime += 1000;
+      }
+      function sleepCheck() {
+        var now = new Date().getTime();
+        var diff = now - lastCheck;
+        if (diff > 3000) {
+          $.getJSON("TimeService.svc/servertime", function (data) {
+            inittime = Date.parse(data.Data);
+          });
+        }
+        lastCheck = now;
+      }
+      window.onload = function () {
+        lastCheck = new Date().getTime();
+        setInterval(sleepCheck, 1000);
+      };
+    </script>
+  </body>
+</html>

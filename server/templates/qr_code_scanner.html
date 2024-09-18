@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <script src="Scripts/ccu.js"></script>
+    <title> </title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0;" />
+    <script src="Scripts/jsQR.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Ropa+Sans" rel="stylesheet" />
+    <style>
+      body {
+        font-family: "Ropa Sans", sans-serif;
+        color: #333;
+        max-width: 640px;
+        margin: 0 auto;
+        position: relative;
+      }
+
+      #githubLink {
+        position: absolute;
+        right: 0;
+        top: 12px;
+        color: #2d99ff;
+      }
+
+      h1 {
+        margin: 10px 0;
+        font-size: 40px;
+      }
+
+      /*#loadingMessage {
+      text-align: center;
+      padding: 40px;
+      background-color: #eee;
+    }*/
+
+      #canvas {
+        width: 100%;
+      }
+
+      #output {
+        margin-top: 20px;
+        background: #eee;
+        padding: 10px;
+        padding-bottom: 0;
+      }
+
+      #output div {
+        padding-bottom: 10px;
+        word-wrap: break-word;
+      }
+
+      #noQRFound {
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="canvas" hidden></canvas>
+    <div class="select">
+      <label for="videoSource" style="font-size: 20px">選擇鏡頭/Switch Camera: </label>
+      <select id="videoSource">
+        <option value="environment" selected>default camera</option>
+      </select>
+    </div>
+    <div>
+      若無開啟鏡頭（畫面空白），請確認<br />
+      <ul>
+        <li><span style="color: red">行動逢甲已更新</span>至最新版本</li>
+        <li><span style="color: red">預設的瀏覽器</span>是否有<span style="color: red">開啟相機權限</span></li>
+      </ul>
+      「設定」→「Safari」→「相機」→（詢問或允許）<br />
+      「設定」→「Chrome」→「相機」→ （開啟）
+    </div>
+    <div id="output" hidden>
+      <div hidden><b>Data:</b> <span id="outputData"></span></div>
+    </div>
+    <script>
+      var video = document.createElement("video");
+      var canvasElement = document.getElementById("canvas");
+      var canvas = canvasElement.getContext("2d");
+      var outputContainer = document.getElementById("output");
+      var outputData = document.getElementById("outputData");
+
+      var videoSelect = document.querySelector("select#videoSource");
+
+      videoSelect.onchange = getStream;
+
+      getStream().then(getDevices).then(gotDevices);
+
+      function getDevices() {
+        // AFAICT in Safari this only gets default devices until gUM is called :/
+        return navigator.mediaDevices.enumerateDevices();
+      }
+
+      function gotDevices(deviceInfos) {
+        window.deviceInfos = deviceInfos; // make available to console
+        for (const deviceInfo of deviceInfos) {
+          var option = document.createElement("option");
+
+          option.value = deviceInfo.deviceId;
+          if (deviceInfo.kind === "videoinput") {
+            option.text = deviceInfo.label || `Camera ${videoSelect.length + 1}`;
+            videoSelect.appendChild(option);
+          }
+        }
+      }
+
+      function getStream() {
+        if (window.stream) {
+          window.stream.getTracks().forEach(track => {
+            track.stop();
+          });
+        }
+
+        const videoSource = videoSelect.value;
+
+        if (videoSelect.selectedIndex == 0) {
+          var constraints = {
+            audio: false,
+            video: { facingMode: { ideal: "environment" } },
+          };
+        } else {
+          var constraints = {
+            audio: false,
+            video: { deviceId: videoSource ? { exact: videoSource } : undefined },
+          };
+        }
+
+        return navigator.mediaDevices.getUserMedia(constraints).then(gotStream).catch(handleError);
+      }
+
+      function gotStream(stream) {
+        window.stream = stream; // make stream available to console
+        videoSelect.selectedIndex = [...videoSelect.options].findIndex(
+          option => option.text === stream.getVideoTracks()[0].label
+        );
+
+        video.srcObject = stream;
+        video.setAttribute("playsinline", true); // required to tell iOS safari we don't want fullscreen
+        video.setAttribute("muted", true);
+        video.addEventListener("loadedmetadata", e => {
+          video.play();
+        });
+        requestAnimationFrame(tick);
+      }
+
+      function handleError(error) {
+        console.error("Error: ", error);
+      }
+
+      function drawLine(begin, end, color) {
+        canvas.beginPath();
+        canvas.moveTo(begin.x, begin.y);
+        canvas.lineTo(end.x, end.y);
+        canvas.lineWidth = 4;
+        canvas.strokeStyle = color;
+        canvas.stroke();
+      }
+
+      //// Use facingMode: environment to attemt to get the front camera on phones
+      //navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(function(stream) {
+      //  video.srcObject = stream;
+      //  video.setAttribute("playsinline", true); // required to tell iOS safari we don't want fullscreen
+      //  video.play();
+      //  requestAnimationFrame(tick);
+      //});
+
+      function tick() {
+        if (video.readyState === video.HAVE_ENOUGH_DATA) {
+          //loadingMessage.hidden = true;
+          canvasElement.hidden = false;
+          outputContainer.hidden = false;
+
+          canvasElement.height = video.videoHeight;
+          canvasElement.width = video.videoWidth;
+          canvas.drawImage(video, 0, 0, canvasElement.width, canvasElement.height);
+          var imageData = canvas.getImageData(0, 0, canvasElement.width, canvasElement.height);
+          var code = jsQR(imageData.data, imageData.width, imageData.height, {
+            inversionAttempts: "dontInvert",
+          });
+          if (code) {
+            drawLine(code.location.topLeftCorner, code.location.topRightCorner, "#FF3B58");
+            drawLine(code.location.topRightCorner, code.location.bottomRightCorner, "#FF3B58");
+            drawLine(code.location.bottomRightCorner, code.location.bottomLeftCorner, "#FF3B58");
+            drawLine(code.location.bottomLeftCorner, code.location.topLeftCorner, "#FF3B58");
+            outputData.innerText = code.data;
+
+            window.location.href = "../ClockIn/ClassClockin.aspx?param=" + code.data;
+            callback();
+          } else {
+            outputData.parentElement.hidden = true;
+          }
+        }
+        requestAnimationFrame(tick);
+      }
+    </script>
+  </body>
+</html>

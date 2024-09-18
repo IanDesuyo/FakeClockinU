@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <script src="/clockin/Scripts/ccu.js"></script>
+    <meta charset="UTF-8" />
+    <title>簽到</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="/clockin/Content/bootstrap.min.css" rel="stylesheet" />
+    <link href="/clockin/Content/bootstrap-theme.css" rel="stylesheet" />
+    <script src="/clockin/Scripts/bootstrap.min.js"></script>
+  </head>
+  <body>
+    <div class="container text-center">
+      <select class="form-control" id="course" name="course">
+        {% for c in courses %}
+        <option 
+          value="{{ c.sub_id }}"
+          {% if c.sub_id == course.sub_id %}
+          selected
+          {% endif %}
+        >
+        {{ c.cls_name }} | {{ c.sub_name }}</option>
+        {% endfor %}
+      </select>
+      <br />
+      <h3 class="font-weight-bold">
+        {{ course.cls_name }} | {{ course.sub_name }} | 第X節 已打卡人數 0/{{ course.scr_acptcnt }}
+        <button class="btn btn-default">未打卡名單</button>
+      </h3>
+      <br />
+      <!-- <img src="https://chart.googleapis.com/chart?chs=500x500&cht=qr&chl={{ qrcode }}" alt="QR Code" width="full" /> -->
+      <img src="https://api.qrserver.com/v1/create-qr-code/?size=500x500&data={{ qrcode }}" alt="QR Code" width="full" />
+      <br />
+      <br />
+      <p>請掃描上方 QR Code 進行簽到</p>
+    </div>
+
+    <script>
+      const course = document.getElementById('course');
+      course.addEventListener('change', () => {
+        window.location.href = `?sub_id=${course.value}`;
+      });
+
+      document.addEventListener('DOMContentLoaded', () => {
+        setInterval(() => {
+          window.location.reload();
+        }, 10000);
+      });
+    </script>
+  </body>
+</html>

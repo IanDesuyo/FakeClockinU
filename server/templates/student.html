@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <script src="Scripts/ccu.js"></script>
+    <title>學生簽到</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="shortcut icon" type="image/x-icon" href="img/favicon.ico" />
+    <link href="Content/bootstrap.min.css" rel="stylesheet" />
+    <link href="Content/bootstrap-theme.css" rel="stylesheet" />
+    <script src="Scripts/jquery-3.3.1.min.js"></script>
+    <script src="Scripts/bootstrap.min.js"></script>
+    <style type="text/css">
+      .btn-margin {
+        margin: 6px;
+        width: 250px;
+      }
+      .btn-menu {
+        border-width: 1px;
+        border-radius: 3px;
+        border-color: gray;
+        background-color: rgb(240, 239, 245);
+        background-image: none;
+        width: 300px;
+        height: 80px;
+      }
+    </style>
+  </head>
+  <body style="background-color: #fff">
+    <form method="post" action="./Student.aspx" id="form1">
+      <div class="aspNetHidden">
+        <input type="hidden" name="__VIEWSTATE" id="__VIEWSTATE" value="{{ view_state.view_state }}" />
+      </div>
+
+      <div class="aspNetHidden">
+        <input
+          type="hidden"
+          name="__VIEWSTATEGENERATOR"
+          id="__VIEWSTATEGENERATOR"
+          value="{{ view_state.view_state_generator }}"
+        />
+        <input
+          type="hidden"
+          name="__EVENTVALIDATION"
+          id="__EVENTVALIDATION"
+          value="{{ view_state.event_validation }}"
+        />
+      </div>
+      <div style="text-align: center">
+        <br />
+        <br />
+        <input
+          type="submit"
+          name="ButtonClassClockin"
+          value="學生課堂打卡"
+          id="ButtonClassClockin"
+          class="btn btn-default btn-margin btn-menu"
+          style="
+            font-size: Larger;
+            background: url(img/ClockinClassIcon.png);
+            background-repeat: no-repeat;
+            background-color: rgb(240, 239, 245);
+            background-position-x: 8%;
+            background-position-y: 40%;
+            background-size: 20%;
+            color: rgb(85, 85, 85);
+            font-size: 18px;
+            padding: 0 35px 0 105px;
+            white-space: normal;
+          "
+        /><br />
+        <br />
+        <input
+          type="submit"
+          name="ButtonActiveClockin"
+          value="活動簽到"
+          id="ButtonActiveClockin"
+          class="btn btn-default btn-margin btn-menu"
+          style="
+            font-size: Larger;
+            background: url(img/ClockinActiveIcon.png);
+            background-repeat: no-repeat;
+            background-color: rgb(240, 239, 245);
+            background-position-x: 8%;
+            background-position-y: 40%;
+            background-size: 20%;
+            color: rgb(85, 85, 85);
+            font-size: 18px;
+            padding: 0 35px 0 105px;
+          "
+        /><br />
+        <br />
+        <input
+          type="submit"
+          name="ButtonParttimeClockin"
+          value="助學服務刷卡"
+          id="ButtonParttimeClockin"
+          class="btn btn-default btn-margin btn-menu"
+          style="
+            font-size: Larger;
+            background: url(img/ClockinStaffIcon.png);
+            background-repeat: no-repeat;
+            background-color: rgb(240, 239, 245);
+            background-position-x: 8%;
+            background-position-y: 40%;
+            background-size: 20%;
+            color: rgb(85, 85, 85);
+            font-size: 18px;
+            padding: 0 35px 0 105px;
+          "
+        /><br />
+        <br />
+        <input
+          type="submit"
+          name="ButtonAssistantClockin"
+          value="計畫助理簽到"
+          id="ButtonAssistantClockin"
+          class="btn btn-default btn-margin btn-menu"
+          style="
+            font-size: Larger;
+            background: url(img/ClockinStaffIcon.png);
+            background-repeat: no-repeat;
+            background-color: rgb(240, 239, 245);
+            background-position-x: 8%;
+            background-position-y: 40%;
+            background-size: 20%;
+            color: rgb(85, 85, 85);
+            font-size: 18px;
+            padding: 0 35px 0 105px;
+            white-space: normal;
+          "
+        /><br />
+      </div>
+    </form>
+  </body>
+</html>
